@@ -1,43 +1,93 @@
 package tutorials.stallnick.spring.controller;
 
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import tutorials.stallnick.spring.util.MapHelper;
+import org.springframework.web.bind.annotation.*;
+import tutorials.stallnick.spring.model.CharacterClass;
 
-import java.util.Map;
+import java.util.*;
+import java.util.function.BiFunction;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @RestController
-@RequestMapping("/api/character-class")
+@RequestMapping("api/character-class")
 public class CharacterClassRest {
 
-  Map<Integer, String> classesMap = Map.ofEntries(
-      MapHelper.entry(1, "Barbarian"),
-      MapHelper.entry(2, "Bard"),
-      MapHelper.entry(3, "Cleric"),
-      MapHelper.entry(4, "Druid"),
-      MapHelper.entry(5, "Fighter"),
-      MapHelper.entry(6, "Monk"),
-      MapHelper.entry(7, "Paladin"),
-      MapHelper.entry(8, "Ranger"),
-      MapHelper.entry(9, "Rogue"),
-      MapHelper.entry(10, "Sorcerer"),
-      MapHelper.entry(11, "Warlock"),
-      MapHelper.entry(12, "Wizard")
-  );
+  List<CharacterClass> characterClasses = Stream.of(
+      new CharacterClass("Barbarian"),
+      new CharacterClass("Bard"),
+      new CharacterClass("Cleric"),
+      new CharacterClass("Druid"),
+      new CharacterClass("Fighter"),
+      new CharacterClass("Monk"),
+      new CharacterClass("Paladin"),
+      new CharacterClass("Ranger"),
+      new CharacterClass("Rogue"),
+      new CharacterClass("Sorcerer"),
+      new CharacterClass("Warlock"),
+      new CharacterClass("Wizard")
+  ).collect(Collectors.toList());
 
-  public CharacterClassRest() {
+  Map<UUID, CharacterClass> characterClassMap = characterClasses
+      .parallelStream()
+      .collect(Collectors.toMap(CharacterClass::getId, Function.identity()));
 
+  @GetMapping("/{id}")
+  public CharacterClass getCharacterClassById(@PathVariable UUID id) {
+    return this.characterClassMap.get(id);
   }
 
   @GetMapping("/")
-  public Map<Integer, String> getCharacterClasses() {
-    return this.classesMap;
+  public List<CharacterClass> getCharacterClasses() {
+    return this.characterClasses;
   }
 
-  @GetMapping("/{id}")
-  public String getCharacterClassById(@PathVariable Integer id) {
-    return this.classesMap.get(id);
+  @GetMapping(params = {"name", "exact"})
+  public List<CharacterClass> getCharacterClassesByNameSearch(
+      @RequestParam String name,
+      @RequestParam Boolean exact) {
+
+    // const filterCharacterList = function(filterFn) {
+    //   characterClasses.filter(filterFn)
+    // }
+    Function<Predicate<CharacterClass>, List<CharacterClass>> filterCharacterList = filterFn ->
+        characterClasses
+          .stream()
+          .filter(filterFn)
+          .collect(Collectors.toList());
+
+    if (!exact) {
+      return filterCharacterList.apply(characterClass -> characterClass.hasNameContains(name));
+    } else {
+      return filterCharacterList.apply(characterClass -> characterClass.hasNameLike(name));
+    }
   }
+
+  Map<Integer, BiFunction<String, CharacterClass, Boolean>> nameSearchMap = Map.of(
+      0, (name, characterClass) -> characterClass.hasNameContains(name),
+      1, (name, characterClass) -> characterClass.hasNameLike(name)
+  );
+
+  @GetMapping(value = "/branchless", params = {"name", "exact"})
+  public List<CharacterClass> getCharacterClassesByNameSearchBranchless(
+      @RequestParam String name,
+      @RequestParam Integer exact) {
+
+    try {
+      BiFunction<String, CharacterClass, Boolean> filterFn = nameSearchMap.get(exact);
+
+      return characterClasses
+          .stream()
+          .filter(characterClass -> filterFn.apply(name, characterClass))
+          .collect(Collectors.toList());
+
+    } catch (Exception e) {
+      System.out.println("Parameter exact did not match the required functionality. Value was: " + exact);
+      return Collections.emptyList();
+    }
+  }
+
+
 }
