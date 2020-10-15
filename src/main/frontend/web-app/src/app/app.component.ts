@@ -31,7 +31,11 @@ export class AppComponent {
       convert: 'CAMEL_CASE'
     }
 
-    this.data = this.http.get<any>('/api/cookies', {params})
+    const headers: {[header: string]: string | string[]} = {
+      'Modify-Custom-Header': 'DO IT'
+    }
+
+    this.data = this.http.get<any>('/api/cookies', {params, headers})
       .pipe(tap(data => {
         console.groupCollapsed('getCookie')
         console.log(data)

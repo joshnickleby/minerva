@@ -24,11 +24,8 @@ export class ConvertInterceptor extends FileAware implements HttpInterceptor {
 
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
 
-    this.logGroup('', req);
-
     if (req.params.has('convert')) {
       const convertType = req.params.get('convert')
-      this.logGroup('', req);
 
       this.log(`Converted to type: ${convertType}`)
 

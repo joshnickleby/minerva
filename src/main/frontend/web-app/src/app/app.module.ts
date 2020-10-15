@@ -6,6 +6,8 @@ import { AppComponent } from './app.component';
 import {HttpClientModule} from '@angular/common/http'
 import {FormsModule} from '@angular/forms'
 import {HTTP_INTERCEPTOR_PROVIDERS} from './interceptors'
+import {ToastrModule} from 'ngx-toastr'
+import {BrowserAnimationsModule} from '@angular/platform-browser/animations'
 
 @NgModule({
   declarations: [
@@ -13,9 +15,11 @@ import {HTTP_INTERCEPTOR_PROVIDERS} from './interceptors'
   ],
   imports: [
     BrowserModule,
+    BrowserAnimationsModule,
     AppRoutingModule,
     HttpClientModule,
-    FormsModule
+    FormsModule,
+    ToastrModule.forRoot()
   ],
   providers: [
     HTTP_INTERCEPTOR_PROVIDERS
