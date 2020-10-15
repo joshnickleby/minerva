@@ -2,8 +2,6 @@ import {Component, Inject} from '@angular/core'
 import {HttpClient} from '@angular/common/http'
 import {tap} from 'rxjs/operators'
 import {Observable} from 'rxjs'
-import {CookieService} from 'ngx-cookie-service'
-import {browser} from 'protractor'
 import {DOCUMENT} from '@angular/common'
 
 @Component({
@@ -26,12 +24,12 @@ export class AppComponent {
   }
 
   getCookie() {
-    const params: {[param: string]: string | string[]} = {
+    const params: { [param: string]: string | string[] } = {
       form: 'SIMPLE_DATA',
       convert: 'CAMEL_CASE'
     }
 
-    const headers: {[header: string]: string | string[]} = {
+    const headers: { [header: string]: string | string[] } = {
       'Modify-Custom-Header': 'DO IT'
     }
 
@@ -50,5 +48,9 @@ export class AppComponent {
         console.log(data)
         console.groupEnd()
       }))
+  }
+
+  showError() {
+    this.http.get('/api/error').subscribe()
   }
 }
