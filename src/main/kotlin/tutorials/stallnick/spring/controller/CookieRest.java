@@ -21,6 +21,7 @@ public class CookieRest {
 
       HttpCookie cookie = ResponseCookie
           .from(cookieParam.key, cookieParam.value)
+          .sameSite("None")
           .path("/api/cookies")
           .domain("")
           .maxAge(10000L)
@@ -32,7 +33,8 @@ public class CookieRest {
 
       return response
           .header(HttpHeaders.SET_COOKIE, cookie.toString())
-          .body("addCustomCookie - key: " + cookieParam.key + ", value: " + cookieParam.value);
+          .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+          .body(cookie);
     } else {
       return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
     }
@@ -40,18 +42,22 @@ public class CookieRest {
 
   @GetMapping(params = {"form"})
   public ResponseEntity<Object> getCookieByForm() {
+    HttpCookie cookie = createSimpleCookie();
+
     return ResponseEntity
         .ok()
-        .header(HttpHeaders.SET_COOKIE, createSimpleCookie().toString())
-        .body("getCookieByForm");
+        .header(HttpHeaders.SET_COOKIE, cookie.toString())
+        .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+        .body(cookie);
   }
 
   private HttpCookie createSimpleCookie() {
     return ResponseCookie
         .from("simple-cookie", simpleCookieValue)
+        .sameSite("None")
         .path("/api/cookies")
         .domain("")
-        .maxAge(100L)
+        .maxAge(10000L)
         .build();
   }
 

@@ -5,6 +5,7 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import {HttpClientModule} from '@angular/common/http'
 import {FormsModule} from '@angular/forms'
+import {HTTP_INTERCEPTOR_PROVIDERS} from './interceptors'
 
 @NgModule({
   declarations: [
@@ -16,7 +17,9 @@ import {FormsModule} from '@angular/forms'
     HttpClientModule,
     FormsModule
   ],
-  providers: [],
+  providers: [
+    HTTP_INTERCEPTOR_PROVIDERS
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

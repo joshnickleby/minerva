@@ -26,7 +26,12 @@ export class AppComponent {
   }
 
   getCookie() {
-    this.data = this.http.get<any>('/api/cookies?form=SIMPLE_DATA')
+    const params: {[param: string]: string | string[]} = {
+      form: 'SIMPLE_DATA',
+      convert: 'CAMEL_CASE'
+    }
+
+    this.data = this.http.get<any>('/api/cookies', {params})
       .pipe(tap(data => {
         console.groupCollapsed('getCookie')
         console.log(data)
