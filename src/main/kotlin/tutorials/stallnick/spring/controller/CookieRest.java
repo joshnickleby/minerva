@@ -55,6 +55,7 @@ public class CookieRest {
     return ResponseCookie
         .from("simple-cookie", simpleCookieValue)
         .sameSite("None")
+        .httpOnly(true)
         .path("/api/cookies")
         .domain("")
         .maxAge(10000L)

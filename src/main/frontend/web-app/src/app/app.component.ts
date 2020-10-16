@@ -30,10 +30,11 @@ export class AppComponent {
     }
 
     const headers: { [header: string]: string | string[] } = {
-      'Modify-Custom-Header': 'DO IT'
+      'Modify-Custom-Header': 'DO IT',
+      'Enable-Auth': 'true'
     }
 
-    this.data = this.http.get<any>('/api/cookies', {params, headers})
+    this.data = this.http.get<any>('/api/cookies', {params, headers, observe: 'response', withCredentials: false})
       .pipe(tap(data => {
         console.groupCollapsed('getCookie')
         console.log(data)
