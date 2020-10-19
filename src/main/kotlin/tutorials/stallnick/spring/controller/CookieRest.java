@@ -12,7 +12,7 @@ public class CookieRest {
   @PostMapping(params = {"expiration"})
   public ResponseEntity<Object> addCustomCookie(@RequestBody CookieParam cookieParam,
                                                 @RequestParam Boolean expiration,
-                                                @CookieValue("simple-cookie") String existingCookie) {
+                                                @CookieValue("Simple-Cookie") String existingCookie) {
 
     System.out.println("Cookie: " + existingCookie);
 
@@ -23,7 +23,6 @@ public class CookieRest {
           .from(cookieParam.key, cookieParam.value)
           .sameSite("None")
           .path("/api/cookies")
-          .domain("")
           .maxAge(10000L)
           .build();
 
@@ -40,26 +39,40 @@ public class CookieRest {
     }
   }
 
+  @CrossOrigin
   @GetMapping(params = {"form"})
   public ResponseEntity<Object> getCookieByForm() {
     HttpCookie cookie = createSimpleCookie();
 
-    return ResponseEntity
-        .ok()
-        .header(HttpHeaders.SET_COOKIE, cookie.toString())
-        .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-        .body(cookie);
+    ResponseEntity<Object> re = createResponseWithCookie(cookie, cookie);
+
+    return re;
   }
 
   private HttpCookie createSimpleCookie() {
     return ResponseCookie
-        .from("simple-cookie", simpleCookieValue)
+        .from("Simple-Cookie", simpleCookieValue)
         .sameSite("None")
+        .secure(false)
         .httpOnly(true)
         .path("/api/cookies")
-        .domain("")
         .maxAge(10000L)
         .build();
+  }
+
+  private ResponseEntity<Object> createResponseWithCookie(Object content, HttpCookie cookie) {
+    return ResponseEntity
+        .ok()
+        .header(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, "http://localhost:4200")
+        .header(HttpHeaders.ACCESS_CONTROL_ALLOW_CREDENTIALS, "true")
+        .header(HttpHeaders.ACCESS_CONTROL_ALLOW_METHODS, "POST, GET, OPTIONS, DELETE, PUT")
+        .header(HttpHeaders.ACCESS_CONTROL_MAX_AGE, "3600")
+        .header(HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS, "Content-Type, Range")
+        .header(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS, "Accept-Ranges, Content-Encoding, Content-Length, Content-Range, Set-Cookie")
+        .header(HttpHeaders.SET_COOKIE, cookie.toString())
+        .header("Test-Header", "This-is-a-test")
+        .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+        .body(content);
   }
 
   private enum CookieForm {
