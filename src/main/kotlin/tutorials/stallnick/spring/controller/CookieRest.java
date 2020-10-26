@@ -2,10 +2,12 @@ package tutorials.stallnick.spring.controller;
 
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
+import tutorials.stallnick.spring.common.CustomCookie;
 
-import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/cookies")
@@ -16,7 +18,7 @@ public class CookieRest {
   private final Supplier<HttpCookie> createSimpleCookie = () ->
       ResponseCookie
           .from("Simple-Cookie", simpleCookieValue)
-          .sameSite("None")
+          .sameSite("Lax")
           .secure(false)
           .httpOnly(true)
           .path("/api/cookies")
@@ -27,19 +29,6 @@ public class CookieRest {
   private final Map<CookieForm, Supplier<HttpCookie>> cookieFormFunctions = Map.of(
       CookieForm.SIMPLE_DATA, createSimpleCookie
   );
-
-  @CrossOrigin
-  @GetMapping(params = {"form"})
-  public ResponseEntity<Object> getCookieByForm(@RequestHeader HttpHeaders headers,
-                                                @RequestParam CookieForm form) {
-    System.out.println(headers.toString());
-
-    Supplier<HttpCookie> cookieSupplier = cookieFormFunctions.get(form);
-
-    HttpCookie cookie = cookieSupplier.get();
-
-    return createResponseWithCookie(cookie, cookie);
-  }
 
   @PostMapping(params = {"expiration"})
   public ResponseEntity<Object> addCustomCookie(@RequestBody CookieParam cookieParam,
@@ -54,7 +43,7 @@ public class CookieRest {
 
       HttpCookie cookie = ResponseCookie
           .from(cookieParam.key, cookieParam.value)
-          .sameSite("None")
+          .sameSite("Lax")
           .path("/api/cookies")
           .maxAge(10000L)
           .build();
@@ -72,7 +61,25 @@ public class CookieRest {
     }
   }
 
-  private ResponseEntity<Object> createResponseWithCookie(Object content, HttpCookie cookie) {
+  @CrossOrigin
+  @GetMapping(params = {"form"})
+  public ResponseEntity<Object> getCookieByForm(@RequestHeader HttpHeaders headers,
+                                                @RequestParam CookieForm form) {
+    System.out.println(headers.toString());
+
+    CustomCookie cookie = new CustomCookie("simple-cookie", simpleCookieValue)
+        .expires(1000L)
+        .path("/api/cookies");
+
+    return createResponseWithCookies(cookie, List.of(cookie));
+  }
+
+  private ResponseEntity<Object> createResponseWithCookies(Object content, List<CustomCookie> cookies) {
+    String cookiesString = cookies
+        .stream()
+        .map(CustomCookie::toJsonString)
+        .collect(Collectors.joining(", "));
+
     return ResponseEntity
         .ok()
         .header(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, "http://localhost:4200")
@@ -81,7 +88,7 @@ public class CookieRest {
         .header(HttpHeaders.ACCESS_CONTROL_MAX_AGE, "3600")
         .header(HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS, "Content-Type, Range")
         .header(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS, "Accept-Ranges, Content-Encoding, Content-Length, Content-Range, Set-Cookie")
-        .header("Custom-Cookies", cookie.toString())
+        .header("custom-cookies", "[" + cookiesString + "]")
         .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
         .body(content);
   }

@@ -17,13 +17,13 @@ export class FileAware {
   }
 
   logTable(tableName: string, data: any[]) {
-    console.groupCollapsed(tableName)
+    console.groupCollapsed(`${this.className}.${tableName}`)
     console.table(data)
     console.groupEnd()
   }
 
   logGroup(groupName: string, ...args: any) {
-    console.groupCollapsed(groupName)
+    console.groupCollapsed(`${this.className}.${groupName}`)
     console.log(...args)
     console.groupEnd()
   }
