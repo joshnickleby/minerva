@@ -23,7 +23,7 @@ export class AppComponent {
   constructor(private http: HttpClient,
               @Inject(DOCUMENT) private document: Document,
               private cookieService: CookieService) {
-    console.log(document.cookie)
+
   }
 
   getCookie() {
@@ -46,7 +46,9 @@ export class AppComponent {
   }
 
   checkCookies() {
+
     console.log('check cookies', this.cookieService.check('Simple-Cookie'))
+    console.log('cookie list', this.cookieService.getAll())
   }
 
   addCookie() {

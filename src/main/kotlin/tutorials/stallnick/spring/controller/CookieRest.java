@@ -3,14 +3,47 @@ package tutorials.stallnick.spring.controller;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Supplier;
+
 @RestController
 @RequestMapping("/api/cookies")
 public class CookieRest {
 
   private final String simpleCookieValue = "This-represents-the-value";
 
+  private final Supplier<HttpCookie> createSimpleCookie = () ->
+      ResponseCookie
+          .from("Simple-Cookie", simpleCookieValue)
+          .sameSite("None")
+          .secure(false)
+          .httpOnly(true)
+          .path("/api/cookies")
+          .maxAge(10000L)
+          .build();
+
+  // branchless function calling
+  private final Map<CookieForm, Supplier<HttpCookie>> cookieFormFunctions = Map.of(
+      CookieForm.SIMPLE_DATA, createSimpleCookie
+  );
+
+  @CrossOrigin
+  @GetMapping(params = {"form"})
+  public ResponseEntity<Object> getCookieByForm(@RequestHeader HttpHeaders headers,
+                                                @RequestParam CookieForm form) {
+    System.out.println(headers.toString());
+
+    Supplier<HttpCookie> cookieSupplier = cookieFormFunctions.get(form);
+
+    HttpCookie cookie = cookieSupplier.get();
+
+    return createResponseWithCookie(cookie, cookie);
+  }
+
   @PostMapping(params = {"expiration"})
   public ResponseEntity<Object> addCustomCookie(@RequestBody CookieParam cookieParam,
+                                                @RequestHeader HttpHeaders headers,
                                                 @RequestParam Boolean expiration,
                                                 @CookieValue("Simple-Cookie") String existingCookie) {
 
@@ -27,7 +60,7 @@ public class CookieRest {
           .build();
 
       if (expiration) {
-        response.header(HttpHeaders.SET_COOKIE, createSimpleCookie().toString());
+        response.header(HttpHeaders.SET_COOKIE, createSimpleCookie.get().toString());
       }
 
       return response
@@ -39,27 +72,6 @@ public class CookieRest {
     }
   }
 
-  @CrossOrigin
-  @GetMapping(params = {"form"})
-  public ResponseEntity<Object> getCookieByForm() {
-    HttpCookie cookie = createSimpleCookie();
-
-    ResponseEntity<Object> re = createResponseWithCookie(cookie, cookie);
-
-    return re;
-  }
-
-  private HttpCookie createSimpleCookie() {
-    return ResponseCookie
-        .from("Simple-Cookie", simpleCookieValue)
-        .sameSite("None")
-        .secure(false)
-        .httpOnly(true)
-        .path("/api/cookies")
-        .maxAge(10000L)
-        .build();
-  }
-
   private ResponseEntity<Object> createResponseWithCookie(Object content, HttpCookie cookie) {
     return ResponseEntity
         .ok()
@@ -69,8 +81,7 @@ public class CookieRest {
         .header(HttpHeaders.ACCESS_CONTROL_MAX_AGE, "3600")
         .header(HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS, "Content-Type, Range")
         .header(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS, "Accept-Ranges, Content-Encoding, Content-Length, Content-Range, Set-Cookie")
-        .header(HttpHeaders.SET_COOKIE, cookie.toString())
-        .header("Test-Header", "This-is-a-test")
+        .header("Custom-Cookies", cookie.toString())
         .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
         .body(content);
   }

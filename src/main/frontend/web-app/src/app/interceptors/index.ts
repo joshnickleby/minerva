@@ -9,9 +9,11 @@ import {ProfilerInterceptor} from './profiler.interceptor'
 import {FakeInterceptor} from './fake.interceptor'
 import {CacheInterceptor} from './cache.interceptor'
 import {AuthInterceptor} from './auth.interceptor'
+import {CookieInterceptor} from './cookie.interceptor'
 
 export const HTTP_INTERCEPTOR_PROVIDERS = [
   {provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true},
+  {provide: HTTP_INTERCEPTORS, useClass: CookieInterceptor, multi: true},
   {provide: HTTP_INTERCEPTORS, useClass: CacheInterceptor, multi: true},
   {provide: HTTP_INTERCEPTORS, useClass: ConvertInterceptor, multi: true},
   {provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true},
