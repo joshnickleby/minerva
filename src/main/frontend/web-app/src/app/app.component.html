@@ -2,17 +2,11 @@
 <div>
 
   <div>
-    <button (click)="getCookie()">Get Simple Cookie</button>
+    <button (click)="getSimpleCookie()">Get Simple Cookie</button>
   </div>
 
   <div>
-    <label for="cookie-key">Cookie Key</label>
-    <input id="cookie-key" [(ngModel)]="cookie.key">
-
-    <label for="cookie-value">Cookie Value</label>
-    <input id="cookie-value" [(ngModel)]="cookie.value">
-
-    <button (click)="addCookie()">Save New Cookie</button>
+    <button (click)="getComplexCookie()">Get Multiple Cookies</button>
   </div>
 </div>
 

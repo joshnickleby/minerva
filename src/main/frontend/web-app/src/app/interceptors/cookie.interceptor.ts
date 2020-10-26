@@ -8,13 +8,15 @@ import {tap} from 'rxjs/operators'
 interface CustomCookie {
   name: string,
   value: string,
-  options: {
-    expires?: number | Date
-    path?: string
-    domain?: string
-    secure?: boolean
-    sameSite?: 'Lax' | 'None' | 'Strict'
-  }
+  options: CustomCookieOptions
+}
+
+interface CustomCookieOptions {
+  expires?: number | Date
+  path?: string
+  domain?: string
+  secure?: boolean
+  sameSite?: 'Lax' | 'None' | 'Strict'
 }
 
 @Injectable()
@@ -36,16 +38,10 @@ export class CookieInterceptor extends FileAware implements HttpInterceptor {
 
             const cookies = JSON.parse(cookieJsonString) as CustomCookie[]
 
-            this.logGroup('receiving cookies', cookies)
+            this.logGroup('intercept Cookie', cookies)
 
             cookies.forEach(cookie => {
-              const options: {
-                expires?: number | Date;
-                path?: string;
-                domain?: string;
-                secure?: boolean;
-                sameSite?: 'Lax' | 'None' | 'Strict';
-              } = {}
+              const options: CustomCookieOptions = {}
 
               // the library can't handle the object so I have to parse out null values
               Object.keys(cookie.options).forEach(k => {

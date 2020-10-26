@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 @RestController
 @RequestMapping("/api/cookies")
@@ -26,8 +27,23 @@ public class CookieRest {
           .build();
 
   // branchless function calling
-  private final Map<CookieForm, Supplier<HttpCookie>> cookieFormFunctions = Map.of(
-      CookieForm.SIMPLE_DATA, createSimpleCookie
+  private final Map<CookieForm, Supplier<List<CustomCookie>>> cookieFormFunctions = Map.of(
+      CookieForm.SIMPLE_DATA, () -> {
+        CustomCookie cookie = new CustomCookie("simple-cookie", simpleCookieValue)
+            .expires(1000L)
+            .path("/api/cookies");
+
+        return List.of(cookie);
+      },
+      CookieForm.COMPLEX_DATA, () -> IntStream
+          .of(1, 2)
+          .boxed()
+          .map(i ->
+              new CustomCookie("complex-cookie-" + i, "content-" + i)
+                  .expires(1000L)
+                  .path("/api/cookies?form=COMPLEX_DATA")
+          )
+          .collect(Collectors.toList())
   );
 
   @PostMapping(params = {"expiration"})
@@ -67,11 +83,11 @@ public class CookieRest {
                                                 @RequestParam CookieForm form) {
     System.out.println(headers.toString());
 
-    CustomCookie cookie = new CustomCookie("simple-cookie", simpleCookieValue)
-        .expires(1000L)
-        .path("/api/cookies");
+    List<CustomCookie> cookies = cookieFormFunctions
+        .get(form)
+        .get();
 
-    return createResponseWithCookies(cookie, List.of(cookie));
+    return createResponseWithCookies(cookies, cookies);
   }
 
   private ResponseEntity<Object> createResponseWithCookies(Object content, List<CustomCookie> cookies) {

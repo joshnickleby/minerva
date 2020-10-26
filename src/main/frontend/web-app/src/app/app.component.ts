@@ -26,7 +26,7 @@ export class AppComponent {
 
   }
 
-  getCookie() {
+  getSimpleCookie() {
     const params: { [param: string]: string | string[] } = {
       form: 'SIMPLE_DATA',
       convert: 'CAMEL_CASE'
@@ -39,7 +39,26 @@ export class AppComponent {
 
     this.data = this.http.get<any>('/api/cookies', {params, headers, observe: 'response', withCredentials: true})
       .pipe(tap(data => {
-        console.groupCollapsed('getCookie')
+        console.groupCollapsed('getSimpleCookie')
+        console.log(data)
+        console.groupEnd()
+      }))
+  }
+
+  getComplexCookie() {
+    const params: { [param: string]: string | string[] } = {
+      form: 'COMPLEX_DATA',
+      convert: 'CAMEL_CASE'
+    }
+
+    const headers: { [header: string]: string | string[] } = {
+      'Modify-Custom-Header': 'DO IT',
+      'Enable-Auth': 'true'
+    }
+
+    this.data = this.http.get<any>('/api/cookies', {params, headers, observe: 'response', withCredentials: true})
+      .pipe(tap(data => {
+        console.groupCollapsed('getComplexCookie')
         console.log(data)
         console.groupEnd()
       }))
@@ -49,20 +68,6 @@ export class AppComponent {
 
     console.log('check cookies', this.cookieService.check('Simple-Cookie'))
     console.log('cookie list', this.cookieService.getAll())
-  }
-
-  addCookie() {
-    const headers: { [header: string]: string | string[] } = {
-      'Modify-Custom-Header': 'DO IT',
-      'Enable-Auth': 'true'
-    }
-
-    this.data = this.http.post<any>('/api/cookies?expiration=false', this.cookie, {headers, observe: 'response', withCredentials: true})
-      .pipe(tap(data => {
-        console.groupCollapsed('addCookie')
-        console.log(data)
-        console.groupEnd()
-      }))
   }
 
   showError() {
