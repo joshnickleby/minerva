@@ -8,6 +8,7 @@ import {FormsModule} from '@angular/forms'
 import {HTTP_INTERCEPTOR_PROVIDERS} from './interceptors'
 import {ToastrModule} from 'ngx-toastr'
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations'
+import {HttpExampleModule} from './components/http/http-example.module'
 
 @NgModule({
   declarations: [
@@ -19,7 +20,8 @@ import {BrowserAnimationsModule} from '@angular/platform-browser/animations'
     AppRoutingModule,
     HttpClientModule,
     FormsModule,
-    ToastrModule.forRoot()
+    ToastrModule.forRoot(),
+    HttpExampleModule
   ],
   providers: [
     HTTP_INTERCEPTOR_PROVIDERS

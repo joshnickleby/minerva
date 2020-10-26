@@ -1,23 +1,6 @@
 
-<div>
-
-  <div>
-    <button (click)="getSimpleCookie()">Get Simple Cookie</button>
-  </div>
-
-  <div>
-    <button (click)="getComplexCookie()">Get Multiple Cookies</button>
-  </div>
+<div style="margin-bottom: 40px">
+  <a routerLink="/http-example/cookies/">Cookies</a>
 </div>
 
-<div>
-  <pre><code>{{data | async | json}}</code></pre>
-</div>
-
-<div>
-  <button (click)="showError()">Error Test</button>
-</div>
-
-<div>
-  <button (click)="checkCookies()">Check Cookies</button>
-</div>
+<router-outlet></router-outlet>

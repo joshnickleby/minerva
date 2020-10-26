@@ -14,22 +14,10 @@ import java.util.stream.IntStream;
 @RequestMapping("/api/cookies")
 public class CookieRest {
 
-  private final String simpleCookieValue = "This-represents-the-value";
-
-  private final Supplier<HttpCookie> createSimpleCookie = () ->
-      ResponseCookie
-          .from("Simple-Cookie", simpleCookieValue)
-          .sameSite("Lax")
-          .secure(false)
-          .httpOnly(true)
-          .path("/api/cookies")
-          .maxAge(10000L)
-          .build();
-
   // branchless function calling
   private final Map<CookieForm, Supplier<List<CustomCookie>>> cookieFormFunctions = Map.of(
       CookieForm.SIMPLE_DATA, () -> {
-        CustomCookie cookie = new CustomCookie("simple-cookie", simpleCookieValue)
+        CustomCookie cookie = new CustomCookie("simple-cookie", "This-represents-the-value")
             .expires(1000L)
             .path("/api/cookies");
 
@@ -46,36 +34,36 @@ public class CookieRest {
           .collect(Collectors.toList())
   );
 
-  @PostMapping(params = {"expiration"})
-  public ResponseEntity<Object> addCustomCookie(@RequestBody CookieParam cookieParam,
-                                                @RequestHeader HttpHeaders headers,
-                                                @RequestParam Boolean expiration,
-                                                @CookieValue("Simple-Cookie") String existingCookie) {
-
-    System.out.println("Cookie: " + existingCookie);
-
-    if (existingCookie.equals(simpleCookieValue)) {
-      ResponseEntity.BodyBuilder response = ResponseEntity.ok();
-
-      HttpCookie cookie = ResponseCookie
-          .from(cookieParam.key, cookieParam.value)
-          .sameSite("Lax")
-          .path("/api/cookies")
-          .maxAge(10000L)
-          .build();
-
-      if (expiration) {
-        response.header(HttpHeaders.SET_COOKIE, createSimpleCookie.get().toString());
-      }
-
-      return response
-          .header(HttpHeaders.SET_COOKIE, cookie.toString())
-          .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-          .body(cookie);
-    } else {
-      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
-    }
-  }
+//  @PostMapping(params = {"expiration"})
+//  public ResponseEntity<Object> addCustomCookie(@RequestBody CookieParam cookieParam,
+//                                                @RequestHeader HttpHeaders headers,
+//                                                @RequestParam Boolean expiration,
+//                                                @CookieValue("Simple-Cookie") String existingCookie) {
+//
+//    System.out.println("Cookie: " + existingCookie);
+//
+//    if (existingCookie.equals(simpleCookieValue)) {
+//      ResponseEntity.BodyBuilder response = ResponseEntity.ok();
+//
+//      HttpCookie cookie = ResponseCookie
+//          .from(cookieParam.key, cookieParam.value)
+//          .sameSite("Lax")
+//          .path("/api/cookies")
+//          .maxAge(10000L)
+//          .build();
+//
+//      if (expiration) {
+//        response.header(HttpHeaders.SET_COOKIE, createSimpleCookie.get().toString());
+//      }
+//
+//      return response
+//          .header(HttpHeaders.SET_COOKIE, cookie.toString())
+//          .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+//          .body(cookie);
+//    } else {
+//      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+//    }
+//  }
 
   @CrossOrigin
   @GetMapping(params = {"form"})
@@ -98,12 +86,6 @@ public class CookieRest {
 
     return ResponseEntity
         .ok()
-        .header(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, "http://localhost:4200")
-        .header(HttpHeaders.ACCESS_CONTROL_ALLOW_CREDENTIALS, "true")
-        .header(HttpHeaders.ACCESS_CONTROL_ALLOW_METHODS, "POST, GET, OPTIONS, DELETE, PUT")
-        .header(HttpHeaders.ACCESS_CONTROL_MAX_AGE, "3600")
-        .header(HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS, "Content-Type, Range")
-        .header(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS, "Accept-Ranges, Content-Encoding, Content-Length, Content-Range, Set-Cookie")
         .header("custom-cookies", "[" + cookiesString + "]")
         .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
         .body(content);
